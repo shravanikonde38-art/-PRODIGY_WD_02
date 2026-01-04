@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Modern Stopwatch – Black Theme</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+:root{
+    --bg-main: radial-gradient(circle at top, #0a0a0a, #000000);
+    --glass: rgba(255,255,255,0.10);
+    --border: rgba(255,255,255,0.22);
+    --text:#e5e7eb;
+    --accent:#38bdf8;
+    --green:#22c55e;
+    --yellow:#facc15;
+    --red:#ef4444;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:var(--bg-main);
+    color:var(--text);
+    overflow:hidden;
+}
+
+.glow-bg{
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(circle at 25% 20%, rgba(56,189,248,0.20), transparent 45%),
+        radial-gradient(circle at 75% 80%, rgba(37,99,235,0.18), transparent 50%);
+    animation:glowMove 14s linear infinite;
+}
+@keyframes glowMove{
+    0%{transform:translate(0,0);}
+    50%{transform:translate(-20px,20px);}
+    100%{transform:translate(0,0);}
+}
+
+.particles span{
+    position:absolute;
+    width:3px;
+    height:3px;
+    background:#94a3b8;
+    opacity:.45;
+    animation:float 6s infinite ease-in-out;
+}
+@keyframes float{
+    0%,100%{transform:translateY(0);opacity:.25;}
+    50%{transform:translateY(-20px);opacity:.7;}
+}
+
+.stopwatch{
+    position:relative;
+    width:410px;
+    padding:48px;
+    background:var(--glass);
+    backdrop-filter:blur(22px);
+    border-radius:26px;
+    border:1px solid var(--border);
+    box-shadow:
+        0 45px 90px rgba(0,0,0,.75),
+        inset 0 0 25px rgba(255,255,255,.06);
+    z-index:2;
+}
+
+.stopwatch h2{
+    text-align:center;
+    letter-spacing:4px;
+    color:white; /* Heading in white */
+    margin-bottom:28px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+}
+
+.timer-icon svg{
+    width:20px;
+    height:20px;
+    stroke:white;
+    animation:iconPulse 2s infinite ease-in-out;
+}
+@keyframes iconPulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.2);}
+}
+
+.sun-icon svg, .moon-icon svg{
+    width:18px;
+    height:18px;
+    stroke:white;
+    fill:none;
+    stroke-width:2;
+    animation:iconPulse 2s infinite ease-in-out;
+}
+
+.display-wrap{
+    padding:32px 0;
+    border-radius:18px;
+    background:linear-gradient(
+        135deg,
+        rgba(56,189,248,.12),
+        rgba(30,64,175,.12)
+    );
+    box-shadow:inset 0 0 28px rgba(56,189,248,.35);
+    margin-bottom:38px;
+}
+
+#display{
+    font-size:56px;
+    font-weight:700;
+    letter-spacing:3px;
+    text-align:center;
+}
+
+.running{
+    animation:pulse 1.6s infinite;
+}
+@keyframes pulse{
+    50%{text-shadow:0 0 38px var(--accent);}
+}
+
+.controls{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin-bottom:30px;
+}
+
+button{
+    padding:16px;
+    border:none;
+    border-radius:14px;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:1px;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    transition:.3s;
+}
+
+button::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+    transform:translateX(-100%);
+}
+button:hover::after{
+    transform:translateX(100%);
+    transition:.6s;
+}
+
+#start{background:linear-gradient(135deg,#16a34a,#22c55e);}
+#pause{background:linear-gradient(135deg,#facc15,#fde047); color:#111;}
+#lap{background:linear-gradient(135deg,#38bdf8,#60a5fa);}
+#reset{background:linear-gradient(135deg,#ef4444,#f87171);}
+
+button:hover{
+    transform:translateY(-4px);
+    box-shadow:0 18px 35px rgba(0,0,0,.6);
+}
+
+button:disabled{
+    opacity:.45;
+    transform:none;
+    box-shadow:none;
+}
+
+/* LAPS */
+.laps{
+    max-height:160px;
+    overflow-y:auto;
+}
+.laps li{
+    list-style:none;
+    padding:8px 0;
+    font-size:14px;
+    border-bottom:1px solid rgba(255,255,255,.15);
+}
+</style>
+</head>
+
+<body>
+
+<div class="glow-bg"></div>
+<div class="particles" id="particles"></div>
+
+<div class="stopwatch">
+    <h2>
+        <span class="timer-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="12" cy="13" r="8" stroke="currentColor"/>
+                <path d="M12 13V9" stroke="currentColor" stroke-linecap="round"/>
+                <path d="M9 2H15" stroke="currentColor" stroke-linecap="round"/>
+            </svg>
+        </span>
+        STOPWATCH
+        <span class="sun-icon">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5" stroke="currentColor"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor"/>
+            </svg>
+        </span>
+        <span class="moon-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor"/>
+            </svg>
+        </span>
+    </h2>
+
+    <div class="display-wrap">
+        <div id="display">00:00:00</div>
+    </div>
+
+    <div class="controls">
+        <button id="start">START</button>
+        <button id="pause" disabled>PAUSE</button>
+        <button id="lap">LAP</button>
+        <button id="reset">RESET</button>
+    </div>
+
+    <ul class="laps" id="laps"></ul>
+</div>
+
+<script>
+const particles=document.getElementById("particles");
+for(let i=0;i<55;i++){
+    const s=document.createElement("span");
+    s.style.left=Math.random()*100+"%";
+    s.style.top=Math.random()*100+"%";
+    s.style.animationDuration=3+Math.random()*4+"s";
+    particles.appendChild(s);
+}
+
+let startTime=0,elapsed=0,timer;
+
+const display=document.getElementById("display");
+const startBtn=document.getElementById("start");
+const pauseBtn=document.getElementById("pause");
+const lapBtn=document.getElementById("lap");
+const resetBtn=document.getElementById("reset");
+const laps=document.getElementById("laps");
+
+function format(ms){
+    let s=Math.floor(ms/1000);
+    let m=Math.floor(s/60);
+    s%=60;
+    let cs=Math.floor((ms%1000)/10);
+    return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}:${String(cs).padStart(2,"0")}`;
+}
+
+startBtn.onclick=()=>{
+    startTime=Date.now()-elapsed;
+    timer=setInterval(()=>{
+        elapsed=Date.now()-startTime;
+        display.textContent=format(elapsed);
+    },10);
+    display.classList.add("running");
+    startBtn.disabled=true;
+    pauseBtn.disabled=false;
+};
+
+pauseBtn.onclick=()=>{
+    clearInterval(timer);
+    display.classList.remove("running");
+    startBtn.disabled=false;
+    pauseBtn.disabled=true;
+};
+
+lapBtn.onclick=()=>{
+    if(!pauseBtn.disabled){
+        const li=document.createElement("li");
+        li.textContent=`Lap ${laps.children.length+1} — ${format(elapsed)}`;
+        laps.prepend(li);
+    }
+};
+
+resetBtn.onclick=()=>{
+    clearInterval(timer);
+    elapsed=0;
+    display.textContent="00:00:00";
+    display.classList.remove("running");
+    laps.innerHTML="";
+    startBtn.disabled=false;
+    pauseBtn.disabled=true;
+};
+</script>
+
+</body>
+</html>
